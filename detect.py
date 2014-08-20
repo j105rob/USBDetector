@@ -26,11 +26,11 @@ CODE = {'A': '.-',     'B': '-...',   'C': '-.-.',
 
 class DeviceAddedListener:
     
-    GPIO.setup("P8_14", GPIO.OUT)
     GPIO.setup("P8_15", GPIO.OUT)
-    GPIO.setup("P8_16", GPIO.OUT)
+    GPIO.setup("P8_17", GPIO.OUT)
+    GPIO.setup("P8_19", GPIO.OUT)
 
-    GPIO.output("P8_14", GPIO.HIGH)
+    GPIO.output("P8_15", GPIO.HIGH)
     
     def __init__(self):
         
@@ -54,8 +54,8 @@ class DeviceAddedListener:
 
         if self.usb:
             
-            GPIO.output("P8_14", GPIO.LOW)
-            GPIO.output("P8_16", GPIO.HIGH)
+            GPIO.output("P8_15", GPIO.LOW)
+            GPIO.output("P8_19", GPIO.HIGH)
             
             if self.mounted:
                 result = commands.getstatusoutput('sudo umount -f /dev/sda1')
@@ -72,8 +72,8 @@ class DeviceAddedListener:
             self.morse()
             time.sleep(2)
             
-            GPIO.output("P8_16", GPIO.LOW)
-            GPIO.output("P8_14", GPIO.HIGH)
+            GPIO.output("P8_19", GPIO.LOW)
+            GPIO.output("P8_15", GPIO.HIGH)
             print "Ready"
             
     def morse(self):
@@ -88,14 +88,14 @@ class DeviceAddedListener:
             for char in egg:
                 
                 if char == ".":
-                    GPIO.output("P8_15", GPIO.HIGH)
+                    GPIO.output("P8_17", GPIO.HIGH)
                     time.sleep(.25)
-                    GPIO.output("P8_15", GPIO.LOW)
+                    GPIO.output("P8_17", GPIO.LOW)
                     time.sleep(.25)
                 if char == "-":
-                    GPIO.output("P8_15", GPIO.HIGH)
+                    GPIO.output("P8_17", GPIO.HIGH)
                     time.sleep(.75)
-                    GPIO.output("P8_15", GPIO.LOW)
+                    GPIO.output("P8_17", GPIO.LOW)
                     time.sleep(.25)
             time.sleep(.75)        
 
@@ -106,8 +106,8 @@ class DeviceAddedListener:
 
     def do_something(self, volume):
         
-        GPIO.output("P8_14", GPIO.LOW)
-        GPIO.output("P8_15", GPIO.HIGH)
+        GPIO.output("P8_15", GPIO.LOW)
+        GPIO.output("P8_17", GPIO.HIGH)
         
         self.device_file = volume.GetProperty("block.device")
         self.label = volume.GetProperty("volume.label")
@@ -143,8 +143,8 @@ class DeviceAddedListener:
             result = commands.getstatusoutput(mkdir)
 
             if result[0] != 0:
-                GPIO.output("P8_15", GPIO.LOW)
-                GPIO.output("P8_16", GPIO.HIGH)
+                GPIO.output("P8_17", GPIO.LOW)
+                GPIO.output("P8_19", GPIO.HIGH)
                 print 'dir creation failed, aborting USB mount.'
                 time.sleep(2)
 
@@ -158,8 +158,8 @@ class DeviceAddedListener:
                     result = commands.getstatusoutput(send)
                     
                     if result[0] != 0:
-                        GPIO.output("P8_15", GPIO.LOW)
-                        GPIO.output("P8_16", GPIO.HIGH)
+                        GPIO.output("P8_17", GPIO.LOW)
+                        GPIO.output("P8_19", GPIO.HIGH)
                         print 'Failed to copy egg...'
                         time.sleep(2)
 
@@ -177,8 +177,8 @@ class DeviceAddedListener:
                     result = commands.getstatusoutput(send)
                     
         else:
-            GPIO.output("P8_15", GPIO.LOW)
-            GPIO.output("P8_16", GPIO.HIGH)
+            GPIO.output("P8_17", GPIO.LOW)
+            GPIO.output("P8_19", GPIO.HIGH)
             print 'Unclean mount directory, please clean up.'
             time.sleep(2)
 
@@ -187,13 +187,13 @@ class DeviceAddedListener:
         
         time.sleep(1)
         
+        GPIO.output("P8_17", GPIO.LOW)
+        GPIO.output("P8_19", GPIO.LOW)
+        GPIO.output("P8_15", GPIO.HIGH)
+        time.sleep(.25)
         GPIO.output("P8_15", GPIO.LOW)
-        GPIO.output("P8_16", GPIO.LOW)
-        GPIO.output("P8_14", GPIO.HIGH)
         time.sleep(.25)
-        GPIO.output("P8_14", GPIO.LOW)
-        time.sleep(.25)
-        GPIO.output("P8_14", GPIO.HIGH)
+        GPIO.output("P8_15", GPIO.HIGH)
         print "Jobs Done."
         
 if __name__ == '__main__':
