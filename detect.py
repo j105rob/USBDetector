@@ -81,7 +81,7 @@ class DeviceAddedListener:
             
     def morse(self):
 
-        file = open('eggload.txt', 'r')
+        file = open('holo.txt', 'r')
         morse = file.readline()
         morse = morse.strip('\n')
 
@@ -89,7 +89,7 @@ class DeviceAddedListener:
             egg = CODE[char.upper()]
 
             for char in egg:
-                
+
                 if char == ".":
                     GPIO.output("P8_17", GPIO.HIGH)
                     time.sleep(.25)
@@ -100,12 +100,15 @@ class DeviceAddedListener:
                     time.sleep(.75)
                     GPIO.output("P8_17", GPIO.LOW)
                     time.sleep(.25)
-            time.sleep(.75)        
+                if char == " ":
+                    time.sleep(.5)
 
-        copy = "sudo sed -n 1p eggload.txt >> /USBDetector/usedegg.txt"
-        result = commands.getstatusoutput(copy)
-        delete = "sudo sed -i 1d eggload.txt"
-        result = commands.getstatusoutput(delete)
+            time.sleep(.5)        
+
+        #copy = "sudo sed -n 1p eggload.txt >> /USBDetector/usedegg.txt"
+        #result = commands.getstatusoutput(copy)
+        #delete = "sudo sed -i 1d eggload.txt"
+        #result = commands.getstatusoutput(delete)
 
     def do_something(self, volume):
         
