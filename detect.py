@@ -104,11 +104,15 @@ class DeviceAddedListener:
                     time.sleep(.5)
 
             time.sleep(.5)        
-
-        #copy = "sudo sed -n 1p eggload.txt >> /USBDetector/usedegg.txt"
-        #result = commands.getstatusoutput(copy)
-        #delete = "sudo sed -i 1d eggload.txt"
-        #result = commands.getstatusoutput(delete)
+        
+        """ Only need this is taking directly from eggload
+        
+        copy = "sudo sed -n 1p eggload.txt >> /USBDetector/usedegg.txt"
+        result = commands.getstatusoutput(copy)
+        delete = "sudo sed -i 1d eggload.txt"
+        result = commands.getstatusoutput(delete)
+        
+        """
 
     def do_something(self, volume):
         
@@ -136,9 +140,13 @@ class DeviceAddedListener:
 
         time.sleep(1)
         
+        if not self.label:
+	        self.label = self.uuid
+            logging.warning('No label on drive, using UUID instead. L2Format')
+        
         if ' ' in self.label:
-            name = self.label.split(' ')
-            self.label = name[0] + "\ " + name[1]
+            self.label = self.label.replace (" ", "\ ")
+            logging.warning('This drive has spaces in its name, why must you annoy me.')
         
         self.mount_dir = "/mnt/" + self.label
         mkdir = 'sudo mkdir %s' % (self.mount_dir)
@@ -166,7 +174,7 @@ class DeviceAddedListener:
                     if result[0] != 0:
                         GPIO.output("P8_17", GPIO.LOW)
                         GPIO.output("P8_19", GPIO.HIGH)
-                        logging.warning('Failed to copy egg...')
+                        logging.warning('Failed to copy...')
                         time.sleep(2)
 
                     else:
