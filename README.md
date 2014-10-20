@@ -17,7 +17,7 @@ usedegg.txt = Eggs that have been picked by script are pulled from eggload and p
 
 moorse.txt = String to be used during moorse code method
 
-usbdebug.txt = generated file with debug from script
+usbdebug.log = generated file with debug from script
 
 Usage
 ===========
