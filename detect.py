@@ -81,7 +81,7 @@ class DeviceAddedListener:
             
     def morse(self):
 
-        file = open('holo.txt', 'r')
+        file = open('moorse.txt', 'r')
         morse = file.readline()
         morse = morse.strip('\n')
 
