@@ -15,7 +15,7 @@ badluck.txt = If egg is not selected pulls a line from this file
 
 usedegg.txt = Eggs that have been picked by script are pulled from eggload and placed here
 
-moorse.txt = String to be used during moorse code method
+morse.txt = String to be used during moorse code method
 
 usbdebug.log = generated file with debug from script
 
