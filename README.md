@@ -6,14 +6,8 @@ Detects when an USB is plugged in and will then mount, attempt to send an EGG to
 Text Files
 ===========
 
-<<<<<<< HEAD
 Script pulls an entire line from the selected text file.<br>
-moose.txt can only have (a-b, 1-9,) spaces aloud and no caps.
-=======
-Script pulls an entire line from the selected text file.
-
 morse.txt can only have (a-b, 1-9,) spaces aloud and no caps.
->>>>>>> origin/master
 
 eggload.txt = Eggs to be placed on USB
 
@@ -28,10 +22,10 @@ usbdebug.log = generated file with debug from script
 Usage
 ===========
 
-To Start:
+To Start:<br>
 `python detect.py`
 
-If the lights stay on after stopping the script use:
+If the lights stay on after stopping the script use:<br>
 `python lightsoff.py`
 
 Green LED = Plug in new USB
