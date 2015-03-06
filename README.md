@@ -7,7 +7,7 @@ Text Files
 ===========
 
 Script pulls an entire line from the selected text file.
-moose.txt can only have (a-b, 1-9,) spaces aloud and no caps.
+morse.txt can only have (a-b, 1-9,) spaces aloud and no caps.
 
 eggload.txt = Eggs to be placed on USB
 
