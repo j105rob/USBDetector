@@ -1,8 +1,5 @@
 import Adafruit_BBIO.GPIO as GPIO
-import dbus
-import gobject
-import commands,os,sys,random
-import time
+import dbus,gobject,commands,os,sys,random,time,logging
 
 #####################################################
 ########             Morse Code              ########
@@ -15,7 +12,7 @@ CODE = {'A': '.-',     'B': '-...',   'C': '-.-.',
         'P': '.--.',   'Q': '--.-',   'R': '.-.',
         'S': '...',    'T': '-',      'U': '..-',
         'V': '...-',   'W': '.--',    'X': '-..-',
-        'Y': '-.--',   'Z': '--..',
+        'Y': '-.--',   'Z': '--..',   ' ': ' ',
 
         '0': '-----',  '1': '.----',  '2': '..---',
         '3': '...--',  '4': '....-',  '5': '.....',
@@ -31,6 +28,11 @@ class DeviceAddedListener:
     GPIO.setup("P8_19", GPIO.OUT)
 
     GPIO.output("P8_15", GPIO.HIGH)
+    
+    logging.basicConfig(filename='usbdebug.log', format='%(asctime)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    
+    result = commands.getstatusoutput('sudo rm -rf /mnt/')
+    result = commands.getstatusoutput('sudo mkdir /mnt/')
     
     def __init__(self):
         
@@ -55,30 +57,31 @@ class DeviceAddedListener:
         if self.usb:
             
             GPIO.output("P8_15", GPIO.LOW)
+            GPIO.output("P8_17", GPIO.LOW)
             GPIO.output("P8_19", GPIO.HIGH)
             
             if self.mounted:
                 result = commands.getstatusoutput('sudo umount -f /dev/sda1')
                 result = commands.getstatusoutput('sudo rm -rf %s' % (self.mount_dir))
-                print "Device Removed."
+                logging.warning('Device Removed.')
 
             else:
-                print "Device removed, something was wrong with it."
+                logging.warning('Device removed, something was wrong with it.')
                 
             self.mounted = False
             self.usb = False
             
-            time.sleep(2)
+            time.sleep(1)
             self.morse()
-            time.sleep(2)
+            time.sleep(1)
             
             GPIO.output("P8_19", GPIO.LOW)
             GPIO.output("P8_15", GPIO.HIGH)
-            print "Ready"
+            logging.warning('Ready')
             
     def morse(self):
 
-        file = open('eggload.txt', 'r')
+        file = open('morse.txt', 'r')
         morse = file.readline()
         morse = morse.strip('\n')
 
@@ -86,7 +89,7 @@ class DeviceAddedListener:
             egg = CODE[char.upper()]
 
             for char in egg:
-                
+
                 if char == ".":
                     GPIO.output("P8_17", GPIO.HIGH)
                     time.sleep(.25)
@@ -97,12 +100,19 @@ class DeviceAddedListener:
                     time.sleep(.75)
                     GPIO.output("P8_17", GPIO.LOW)
                     time.sleep(.25)
-            time.sleep(.75)        
+                if char == " ":
+                    time.sleep(.5)
 
+            time.sleep(.5)        
+        
+        """ Only need this is taking directly from eggload
+        
         copy = "sudo sed -n 1p eggload.txt >> /USBDetector/usedegg.txt"
         result = commands.getstatusoutput(copy)
         delete = "sudo sed -i 1d eggload.txt"
         result = commands.getstatusoutput(delete)
+        
+        """
 
     def do_something(self, volume):
         
@@ -121,23 +131,27 @@ class DeviceAddedListener:
         except:
             size = 0
                                                   
-        print "New storage device detected:"
-        print "  Device File: %s" % self.device_file
-        print "  UUID: %s" % self.uuid
-        print "  Label: %s" % self.label
-        print "  Fstype: %s" % self.fstype
-        print "  Size: %s (%.2fGB)" % (size, float(size) / 1024**3)
+        logging.warning('New storage device detected:')
+        logging.warning('  Device File: %s' % self.device_file)
+        logging.warning('  UUID: %s' % self.uuid)
+        logging.warning('  Label: %s' % self.label)
+        logging.warning('  Fstype: %s' % self.fstype)
+        logging.warning('  Size: %s (%.2fGB)' % (size, float(size) / 1024**3))
 
         time.sleep(1)
         
+        if not self.label:
+	        self.label = self.uuid
+            logging.warning('No label on drive, using UUID instead. L2Format')
+        
         if ' ' in self.label:
-            name = self.label.split(' ')
-            self.label = name[0] + "\ " + name[1]
+            self.label = self.label.replace (" ", "\ ")
+            logging.warning('This drive has spaces in its name, why must you annoy me.')
         
         self.mount_dir = "/mnt/" + self.label
         mkdir = 'sudo mkdir %s' % (self.mount_dir)
         mount = 'sudo mount -t %s /dev/sda1 %s' % (self.fstype, self.mount_dir)
-        print 'Mounting Device: %s (%s)' % (self.label, self.mount_dir)                   
+        logging.warning('Mounting Device: %s (%s)' % (self.label, self.mount_dir))                   
                                                   
         if not os.path.exists(self.mount_dir):
             result = commands.getstatusoutput(mkdir)
@@ -145,7 +159,7 @@ class DeviceAddedListener:
             if result[0] != 0:
                 GPIO.output("P8_17", GPIO.LOW)
                 GPIO.output("P8_19", GPIO.HIGH)
-                print 'dir creation failed, aborting USB mount.'
+                logging.warning('dir creation failed, aborting USB mount.')
                 time.sleep(2)
 
             else:
@@ -153,14 +167,14 @@ class DeviceAddedListener:
                 self.mounted = True
 
                 if random.randint(1, 4) > 1:
-                    print "egg"
+                    logging.warning('egg')
                     send = "sudo sed -n 1p eggload.txt > /media/"+self.label+"/eggload.txt"
                     result = commands.getstatusoutput(send)
                     
                     if result[0] != 0:
                         GPIO.output("P8_17", GPIO.LOW)
                         GPIO.output("P8_19", GPIO.HIGH)
-                        print 'Failed to copy egg...'
+                        logging.warning('Failed to copy...')
                         time.sleep(2)
 
                     else:
@@ -171,15 +185,15 @@ class DeviceAddedListener:
 
                 else:
                     line = random.choice(open('badluck.txt').readlines())
-                    noegg = line.strip('\n')
-                    print noegg
-                    send = "sudo echo "+noegg+" > /media/"+self.label+"/eggload.txt"
+                    self.noegg = line.strip('\n')
+                    logging.warning('%s' % self.noegg)
+                    send = "sudo echo "+self.noegg+" > /media/"+self.label+"/eggload.txt"
                     result = commands.getstatusoutput(send)
                     
         else:
             GPIO.output("P8_17", GPIO.LOW)
             GPIO.output("P8_19", GPIO.HIGH)
-            print 'Unclean mount directory, please clean up.'
+            logging.warning('Unclean mount directory, please clean up.')
             time.sleep(2)
 
         result = commands.getstatusoutput('sudo umount -f /dev/sda1')
@@ -194,7 +208,7 @@ class DeviceAddedListener:
         GPIO.output("P8_15", GPIO.LOW)
         time.sleep(.25)
         GPIO.output("P8_15", GPIO.HIGH)
-        print "Jobs Done."
+        logging.warning('Jobs Done.')
         
 if __name__ == '__main__':
     
